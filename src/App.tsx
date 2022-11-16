@@ -1,8 +1,8 @@
-// The following App.tsx is from https://github.com/aws-amplify/amplify-js/issues/10487
+// The following App.tsx is adapted from https://github.com/aws-amplify/amplify-js/issues/10487
 
 // @ts-nocheck
 import React from "react";
-import { Amplify, DataStore } from "aws-amplify";
+import { Amplify, DataStore, Predicates } from "aws-amplify";
 import { Todo, User } from "./models";
 // import { DISCARD } from "@aws-amplify/datastore";
 
@@ -44,12 +44,13 @@ function App() {
     }
   };
 
-  React.useEffect(() => {
-    addWhoami();
-  }, []);
+  // React.useEffect(() => {
+  //   addWhoami();
+  // }, []);
 
   React.useEffect(() => {
     DataStore.observeQuery(Todo).subscribe(({ items }) => {
+      console.log("observeQuery:", items);
       setTodos(convertToOject(items));
     });
   }, []);
@@ -79,6 +80,11 @@ function App() {
       })
     );
   };
+
+  async function deleteAll() {
+    await DataStore.delete(Todo, Predicates.ALL);
+    await DataStore.delete(User, Predicates.ALL);
+  }
 
   return (
     <div>
@@ -114,6 +120,20 @@ function App() {
         </form>
       ))}
       <input onClick={handleAddTodo} type="submit" value="Add todo" />
+      <button onClick={addWhoami}>Add User</button>
+      <button onClick={deleteAll}>Delete All</button>
+      <div className="section">
+        <pre>
+          <span>whoami:</span>
+          <pre>{JSON.stringify(whoami, null, 2)}</pre>
+        </pre>
+      </div>
+      <div className="section">
+        <pre>
+          <span>Todos:</span>
+          <pre>{JSON.stringify(todos, null, 2)}</pre>
+        </pre>
+      </div>
     </div>
   );
 }
